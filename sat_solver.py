@@ -114,6 +114,50 @@ def unit_propagate(clauses):
     return clauses
 
 
+def del_pure_literal(clauses):
+    """
+    Removes pure literals from a clause.
+    Pure literals only occur positively or negatively,
+    and clauses containing pure literals can be removed from the problem.
+
+    Parameters
+    -------------------
+    clauses : list[list[int]]
+    A list of lists of integers representing a set of clauses.
+
+
+    Returns
+    -------------------
+    clauses : list[list[int]]
+    The set of clauses with pure literal deletion applied
+    """
+
+    while True:
+        # get all literals in the problem
+        literals = set([])
+        pure_literals = []
+        for clause in clauses:
+            literals = literals.union(set(clause))
+
+        for lit in literals:
+            if -lit not in literals:
+                pure_literals.append(lit)
+
+        if not pure_literals:
+            break
+
+        i = 0
+        while i < len(clauses):
+            for lit in pure_literals:
+                if lit in clauses[i]:
+                    del clause[i]
+                    i -= 1
+                    continue
+            i += 1
+
+    return clauses
+
+
 def dpll(clauses, var):
     """
     Performs DPLL on a set of clauses, recursively:
@@ -140,6 +184,8 @@ def dpll(clauses, var):
     if [] in clauses:  # empty clause - cannot be satisfied
         return False
 
+    clauses = del_pure_literal(clauses)
+
     # splitting on var and -var
     # a deep copy needs to be created to avoid modifying clause sets further up the tree
     pos_clauses = [[i for i in clause] for clause in clauses] + [[var]]
@@ -154,9 +200,6 @@ def main():
     if not var_count or not clause_count or not clauses:
         print("File read failed. Terminating")
         return
-
-    for line in clauses:
-        print(line)
 
     result = dpll(clauses, 1)
     if result:
