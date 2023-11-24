@@ -150,9 +150,9 @@ def del_pure_literal(clauses):
         while i < len(clauses):
             for lit in pure_literals:
                 if lit in clauses[i]:
-                    del clause[i]
+                    del clauses[i]
                     i -= 1
-                    continue
+                    break
             i += 1
 
     return clauses
